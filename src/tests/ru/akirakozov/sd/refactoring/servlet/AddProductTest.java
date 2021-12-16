@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import ru.akirakozov.sd.refactoring.database.DataBase;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,7 +17,8 @@ import static org.mockito.Mockito.when;
 import static ru.akirakozov.sd.refactoring.servlet.TestHelper.*;
 
 public class AddProductTest {
-    private AddProductServlet addProductServlet;
+    private final DataBase dataBase = new DataBase("test", true);
+    private final AddProductServlet addProductServlet = new AddProductServlet(dataBase);
 
     @Mock
     private HttpServletRequest request;
@@ -27,9 +29,6 @@ public class AddProductTest {
     @Before
     public void init() throws Exception {
         MockitoAnnotations.initMocks(this);
-        addProductServlet = new AddProductServlet();
-        createNewTable();
-
         checkStatus(response);
     }
 
@@ -44,7 +43,8 @@ public class AddProductTest {
             addProductServlet.doGet(request, response);
             printWriter.close();
             cmpFiles(List.of("OK"));
-        } catch (final Exception ignored) {
+        } catch (final Exception e) {
+            System.out.println(e.getMessage());
             Assert.fail();
         }
     }

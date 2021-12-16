@@ -1,10 +1,12 @@
 package ru.akirakozov.sd.refactoring.servlet;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import ru.akirakozov.sd.refactoring.database.DataBase;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,7 +18,8 @@ import static org.mockito.Mockito.when;
 import static ru.akirakozov.sd.refactoring.servlet.TestHelper.*;
 
 public class QueryServletTest {
-    private QueryServlet queryServlet;
+    final static DataBase dataBase = new DataBase("test", true);
+    final static QueryServlet queryServlet = new QueryServlet(dataBase);
 
     @Mock
     private HttpServletRequest request;
@@ -25,12 +28,15 @@ public class QueryServletTest {
     private HttpServletResponse response;
 
     @Before
-    public void init() throws Exception {
+    public void init() {
         MockitoAnnotations.initMocks(this);
-        queryServlet = new QueryServlet();
-        createNewTable();
-
+        dataBase.create();
         checkStatus(response);
+    }
+
+    @After
+    public void drop() {
+        dataBase.drop();
     }
 
     private void testOperation_zero(final String command, List<String> ans) throws IOException {
@@ -42,14 +48,30 @@ public class QueryServletTest {
             queryServlet.doGet(request, response);
             printWriter.close();
             cmpFilesHTML(ans);
-        } catch (final Exception ignored) {
+        } catch (final Exception e) {
+            System.out.println(e.getMessage());
             Assert.fail();
         }
     }
 
     private void testOperation_single(final String name, final String val, final String command, List<String> ans) throws IOException {
-        addProduct(request, response, name, val);
+        addProduct(request, response, name, val, dataBase);
         testOperation_zero(command, ans);
+    }
+
+    @Test
+    public void badCommandTest() throws IOException {
+        when(request.getParameter("command")).thenReturn("summ");
+        final PrintWriter printWriter = new PrintWriter(testfile);
+        when(response.getWriter()).thenReturn(printWriter);
+
+        try {
+            queryServlet.doGet(request, response);
+            printWriter.close();
+            cmpFiles(List.of("Unknown command: summ"));
+        } catch (final Exception ignored) {
+            Assert.fail();
+        }
     }
 
     @Test
@@ -93,10 +115,10 @@ public class QueryServletTest {
     }
 
     private void addItems() throws IOException {
-        addProduct(request, response, "item1", "3");
-        addProduct(request, response, "item2", "31");
-        addProduct(request, response, "item3", "314");
-        addProduct(request, response, "item4", "3141");
+        addProduct(request, response, "item1", "3", dataBase);
+        addProduct(request, response, "item2", "31", dataBase);
+        addProduct(request, response, "item3", "314", dataBase);
+        addProduct(request, response, "item4", "3141", dataBase);
     }
 
     @Test

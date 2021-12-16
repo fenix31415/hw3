@@ -2,6 +2,7 @@ package ru.akirakozov.sd.refactoring.servlet;
 
 import org.junit.Assert;
 import org.mockito.Mockito;
+import ru.akirakozov.sd.refactoring.database.DataBase;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,20 +41,23 @@ public class TestHelper {
         cmpFiles(anss);
     }
 
-    public static void addProduct(final HttpServletRequest request, final HttpServletResponse response, final String name, final String val, final PrintWriter printWriter) throws IOException {
+    public static void addProduct(final HttpServletRequest request, final HttpServletResponse response,
+                                  final String name, final String val, final PrintWriter printWriter, final DataBase dataBase) throws IOException {
         when(request.getParameter("name")).thenReturn(name);
         when(request.getParameter("price")).thenReturn(val);
         when(response.getWriter()).thenReturn(printWriter);
         try {
-            final AddProductServlet addProductServlet = new AddProductServlet();
+            final AddProductServlet addProductServlet = new AddProductServlet(dataBase);
             addProductServlet.doGet(request, response);
-        } catch (final Exception ignored) {
+        } catch (final Exception e) {
+            System.out.println(e.getMessage());
             Assert.fail();
         }
     }
 
-    public static void addProduct(final HttpServletRequest request, final HttpServletResponse response, final String name, final String val) throws IOException {
-        addProduct(request, response, name, val, new PrintWriter(System.out));
+    public static void addProduct(final HttpServletRequest request, final HttpServletResponse response,
+                                  final String name, final String val, final DataBase dataBase) throws IOException {
+        addProduct(request, response, name, val, new PrintWriter(System.out), dataBase);
     }
 
     private static void dropTable() throws SQLException {
