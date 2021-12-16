@@ -44,6 +44,12 @@ public class TestHelper {
         when(request.getParameter("name")).thenReturn(name);
         when(request.getParameter("price")).thenReturn(val);
         when(response.getWriter()).thenReturn(printWriter);
+        try {
+            final AddProductServlet addProductServlet = new AddProductServlet();
+            addProductServlet.doGet(request, response);
+        } catch (final Exception ignored) {
+            Assert.fail();
+        }
     }
 
     public static void addProduct(final HttpServletRequest request, final HttpServletResponse response, final String name, final String val) throws IOException {

@@ -33,16 +33,7 @@ public class QueryServletTest {
         checkStatus(response);
     }
 
-    private void testOperation_single(final String name, final String val, final String command, List<String> ans) throws IOException {
-        addProduct(request, response, name, val);
-
-        try {
-            final AddProductServlet addProductServlet = new AddProductServlet();
-            addProductServlet.doGet(request, response);
-        } catch (final Exception ignored) {
-            Assert.fail();
-        }
-
+    private void testOperation_zero(final String command, List<String> ans) throws IOException {
         when(request.getParameter("command")).thenReturn(command);
         final PrintWriter printWriter = new PrintWriter(testfile);
         when(response.getWriter()).thenReturn(printWriter);
@@ -56,23 +47,79 @@ public class QueryServletTest {
         }
     }
 
+    private void testOperation_single(final String name, final String val, final String command, List<String> ans) throws IOException {
+        addProduct(request, response, name, val);
+        testOperation_zero(command, ans);
+    }
+
     @Test
-    public void sumOneProductTest() throws IOException {
+    public void sumOneTest() throws IOException {
         testOperation_single("item2", "31", "sum", List.of("Summary price: ", "31"));
     }
 
     @Test
-    public void countOneProductTest() throws Exception {
+    public void countOneTest() throws Exception {
         testOperation_single("item3", "314", "count", List.of("Number of products: ", "1"));
     }
 
     @Test
-    public void maxOneProductTest() throws Exception {
+    public void maxOneTest() throws Exception {
         testOperation_single("item4", "3141", "max", List.of("<h1>Product with max price: </h1>", "item4\t3141</br>"));
     }
 
     @Test
-    public void minOneProductTest() throws Exception {
+    public void minOneTest() throws Exception {
         testOperation_single("item5", "31415", "min", List.of("<h1>Product with min price: </h1>", "item5\t31415</br>"));
+    }
+
+    @Test
+    public void sumZeroTest() throws Exception {
+        testOperation_zero("sum", List.of("Summary price: ", "0"));
+    }
+
+    @Test
+    public void countZeroTest() throws Exception {
+        testOperation_zero("count", List.of("Number of products: ", "0"));
+    }
+
+    @Test
+    public void maxZeroTest() throws Exception {
+        testOperation_zero("max", List.of("<h1>Product with max price: </h1>"));
+    }
+
+    @Test
+    public void minZeroTest() throws Exception {
+        testOperation_zero("min", List.of("<h1>Product with min price: </h1>"));
+    }
+
+    private void addItems() throws IOException {
+        addProduct(request, response, "item1", "3");
+        addProduct(request, response, "item2", "31");
+        addProduct(request, response, "item3", "314");
+        addProduct(request, response, "item4", "3141");
+    }
+
+    @Test
+    public void sumManyTest() throws Exception {
+        addItems();
+        testOperation_zero("sum", List.of("Summary price: ", "3489"));
+    }
+
+    @Test
+    public void countManyTest() throws Exception {
+        addItems();
+        testOperation_zero("count", List.of("Number of products: ", "4"));
+    }
+
+    @Test
+    public void maxManyTest() throws Exception {
+        addItems();
+        testOperation_zero("max", List.of("<h1>Product with max price: </h1>", "item4\t3141</br>"));
+    }
+
+    @Test
+    public void minManyTest() throws Exception {
+        addItems();
+        testOperation_zero("min", List.of("<h1>Product with min price: </h1>", "item1\t3</br>"));
     }
 }

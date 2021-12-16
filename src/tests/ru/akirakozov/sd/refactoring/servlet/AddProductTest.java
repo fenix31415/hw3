@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
+import static org.mockito.Mockito.when;
 import static ru.akirakozov.sd.refactoring.servlet.TestHelper.*;
 
 public class AddProductTest {
@@ -35,7 +36,9 @@ public class AddProductTest {
     @Test
     public void addProductTest() throws IOException {
         final PrintWriter printWriter = new PrintWriter(testfile);
-        addProduct(request, response, "item0", "0", printWriter);
+        when(request.getParameter("name")).thenReturn("item0");
+        when(request.getParameter("price")).thenReturn("0");
+        when(response.getWriter()).thenReturn(printWriter);
 
         try {
             addProductServlet.doGet(request, response);

@@ -8,6 +8,7 @@ import org.mockito.MockitoAnnotations;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.List;
@@ -34,26 +35,36 @@ public class GetProductsTest {
         checkStatus(response);
     }
 
-    @Test
-    public void singleTest() throws Exception {
-        addProduct(request, response, "item1", "3");
-
-        try {
-            final AddProductServlet addProductServlet = new AddProductServlet();
-            addProductServlet.doGet(request, response);
-        } catch (final Exception ignored) {
-            Assert.fail();
-        }
-
+    private void cmpAns(final List<String> ans) throws IOException {
         final PrintWriter printWriter = new PrintWriter(testfile);
         when(response.getWriter()).thenReturn(printWriter);
 
         try {
             getProductsServlet.doGet(request, response);
             printWriter.close();
-            cmpFilesHTML(List.of("item1\t3</br>"));
+            cmpFilesHTML(ans);
         } catch (final Exception ignored) {
             Assert.fail();
         }
+    }
+
+    @Test
+    public void singleTest() throws IOException {
+        addProduct(request, response, "item1", "3");
+        cmpAns(List.of("item1\t3</br>"));
+    }
+
+    @Test
+    public void noTest() throws IOException {
+        cmpAns(List.of());
+    }
+
+    @Test
+    public void manyTest() throws Exception {
+        addProduct(request, response, "item1", "3");
+        addProduct(request, response, "item2", "31");
+        addProduct(request, response, "item3", "314");
+        addProduct(request, response, "item4", "3141");
+        cmpAns(List.of("item1\t3</br>", "item2\t31</br>", "item3\t314</br>", "item4\t3141</br>"));
     }
 }
