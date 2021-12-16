@@ -17,4 +17,8 @@ public class DataBaseItem {
         return cost;
     }
 
+    @Override
+    public String toString() {
+        return getName() + "\t" + getCost();
+    }
 }
