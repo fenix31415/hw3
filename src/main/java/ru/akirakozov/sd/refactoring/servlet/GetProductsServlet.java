@@ -2,6 +2,7 @@ package ru.akirakozov.sd.refactoring.servlet;
 
 import ru.akirakozov.sd.refactoring.database.DataBase;
 import ru.akirakozov.sd.refactoring.database.DataBaseItem;
+import ru.akirakozov.sd.refactoring.html.WriterHTML;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -21,13 +22,7 @@ public class GetProductsServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        final List<DataBaseItem> items = dataBase.getProducts();
-
-        response.getWriter().println("<html><body>");
-        for (final DataBaseItem item : items) {
-            response.getWriter().println(item.getName() + "\t" + item.getCost() + "</br>");
-        }
-        response.getWriter().println("</body></html>");
+        WriterHTML.writeGetProducts(response.getWriter(), dataBase.getProducts());
 
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);

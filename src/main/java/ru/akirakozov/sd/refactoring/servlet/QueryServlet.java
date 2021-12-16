@@ -11,6 +11,8 @@ import java.io.PrintWriter;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static ru.akirakozov.sd.refactoring.html.WriterHTML.*;
+
 /**
  * @author akirakozov
  */
@@ -21,30 +23,19 @@ public class QueryServlet extends HttpServlet {
         this.dataBase = dataBase;
     }
 
-    private void writeAns(final HttpServletResponse response, final String title, final Supplier<String> supplier) throws IOException {
-        PrintWriter writer = response.getWriter();
-        writer.println("<html><body>");
-        writer.println(title);
-        writer.print(supplier.get());
-        writer.println("</body></html>");
-    }
-
-    private static String writeOptional(final Optional<DataBaseItem> item) {
-        return item.map(dataBaseItem -> dataBaseItem + "</br>\n").orElse("");
-    }
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String command = request.getParameter("command");
+        PrintWriter writer = response.getWriter();
 
         if ("max".equals(command)) {
-            writeAns(response, "<h1>Product with max price: </h1>", () -> writeOptional(dataBase.getMax()));
+            writeQueryMax(writer, dataBase.getMax());
         } else if ("min".equals(command)) {
-            writeAns(response, "<h1>Product with min price: </h1>", () -> writeOptional(dataBase.getMin()));
+            writeQueryMin(writer, dataBase.getMin());
         } else if ("sum".equals(command)) {
-            writeAns(response, "Summary price: ", () -> dataBase.getSum() + "\n");
+            writeQuerySum(writer, dataBase.getSum());
         } else if ("count".equals(command)) {
-            writeAns(response, "Number of products: ", () -> dataBase.getCount() + "\n");
+            writeQueryCou(writer, dataBase.getCount());
         } else {
             response.getWriter().println("Unknown command: " + command);
         }
